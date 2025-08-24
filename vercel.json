@@ -1,6 +1,8 @@
 {
   "rewrites": [
+    { "source": "/recipe-app", "destination": "/public/recipe-app/index.html" },
     { "source": "/recipe-app/(.*)", "destination": "/public/recipe-app/$1" },
+    { "source": "/history-app", "destination": "/public/history-app/index.html" },
     { "source": "/history-app/(.*)", "destination": "/public/history-app/$1" },
     { "source": "/api/generate_recipe", "destination": "/api/recipe/generate" },
     { "source": "/api/login", "destination": "/api/recipe/login" },
@@ -14,6 +16,8 @@
     { "source": "/api/generate-content", "destination": "/api/history/generate-content" },
     { "source": "/api/generate-quiz", "destination": "/api/history/generate-quiz" },
     { "source": "/api/test", "destination": "/api/test" },
+    { "source": "/static/(.*)", "destination": "/app/static/$1" },
+    { "source": "/", "destination": "/app/index.html" },
     { "source": "/(.*)", "destination": "/app/$1" }
   ]
 }
