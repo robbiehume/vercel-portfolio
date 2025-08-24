@@ -1,0 +1,19 @@
+{
+  "name": "robbiehume-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "echo 'Static site - no server needed'",
+    "build": "echo 'No build needed'",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "openai": "^4.0.0",
+    "mysql2": "^3.0.0",
+    "jsonwebtoken": "^9.0.0",
+    "bcrypt": "^5.0.0"
+  },
+  "devDependencies": {
+    "vercel": "^32.0.0"
+  }
+}
