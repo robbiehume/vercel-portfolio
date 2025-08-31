@@ -1,3 +1,12 @@
+const { Pool } = require('pg');
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
+
 export default async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -13,16 +22,34 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
   
-  // For now, return success without actually saving
-  // In production, this would save to a database
   const { user_id, title, ingredients, instructions, image_prompt, servings } = req.body;
   
-  console.log('Recipe save requested:', title);
+  if (!user_id || !title || !ingredients || !instructions) {
+    return res.status(400).json({ message: 'Missing required fields' });
+  }
   
-  // Return success response
-  res.status(200).json({ 
-    success: true,
-    message: 'Recipe saving is not configured in this deployment',
-    recipe_id: Math.random().toString(36).substr(2, 9)
-  });
+  try {
+    // Convert arrays to JSON strings for PostgreSQL JSONB columns
+    const ingredientsJson = JSON.stringify(ingredients);
+    const instructionsJson = JSON.stringify(instructions);
+    
+    const result = await pool.query(
+      `INSERT INTO recipes (user_id, title, ingredients, instructions, image_prompt, servings) 
+       VALUES ($1, $2, $3::jsonb, $4::jsonb, $5, $6) 
+       RETURNING id`,
+      [user_id, title, ingredientsJson, instructionsJson, image_prompt, servings]
+    );
+    
+    res.status(201).json({ 
+      success: true,
+      message: 'Recipe saved successfully',
+      recipe_id: result.rows[0].id
+    });
+  } catch (error) {
+    console.error('Save recipe error:', error);
+    res.status(500).json({ 
+      message: 'Failed to save recipe',
+      error: error.message 
+    });
+  }
 }

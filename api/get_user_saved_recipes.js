@@ -1,3 +1,12 @@
+const { Pool } = require('pg');
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
+
 export default async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -13,15 +22,30 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
   
-  // For now, return an empty list
-  // In production, this would fetch from a database
   const { user_id } = req.query;
   
-  console.log('Saved recipes requested for user:', user_id);
+  if (!user_id) {
+    return res.status(400).json({ message: 'User ID is required' });
+  }
   
-  // Return empty list (no database configured)
-  res.status(200).json({ 
-    recipes: [],
-    message: 'Recipe storage is not configured in this deployment'
-  });
+  try {
+    const result = await pool.query(
+      'SELECT id, title, servings, created_at FROM recipes WHERE user_id = $1 ORDER BY created_at DESC',
+      [user_id]
+    );
+    
+    const recipes = result.rows.map(recipe => ({
+      id: recipe.id,
+      title: recipe.title
+    }));
+    
+    // Return just the array, matching the original API format
+    res.status(200).json(recipes);
+  } catch (error) {
+    console.error('Get user recipes error:', error);
+    res.status(500).json({ 
+      message: 'Failed to retrieve user recipes',
+      error: error.message 
+    });
+  }
 }

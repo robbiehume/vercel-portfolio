@@ -1,3 +1,12 @@
+const { Pool } = require('pg');
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
+
 export default async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -13,16 +22,35 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
   
-  // For now, return a stub response
-  // In production, this would delete from a database
-  const { recipe_id } = req.query;
+  const { recipe_id, user_id } = req.query;
   
-  console.log('Delete requested for recipe:', recipe_id);
+  if (!recipe_id || !user_id) {
+    return res.status(400).json({ message: 'Recipe ID and User ID are required' });
+  }
   
-  // Return success response
-  res.status(200).json({ 
-    success: true,
-    message: 'Recipe deletion is not configured in this deployment',
-    recipe_id: recipe_id
-  });
+  try {
+    // Delete the recipe (only if it belongs to the user)
+    const result = await pool.query(
+      'DELETE FROM recipes WHERE id = $1 AND user_id = $2 RETURNING id',
+      [recipe_id, user_id]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ 
+        message: 'Recipe not found or you do not have permission to delete it' 
+      });
+    }
+    
+    res.status(200).json({ 
+      success: true,
+      message: 'Recipe deleted successfully',
+      deleted_id: result.rows[0].id
+    });
+  } catch (error) {
+    console.error('Delete recipe error:', error);
+    res.status(500).json({ 
+      message: 'Failed to delete recipe',
+      error: error.message 
+    });
+  }
 }
