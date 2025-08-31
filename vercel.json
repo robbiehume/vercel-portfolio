@@ -1,9 +1,10 @@
 {
+  "buildCommand": null,
+  "outputDirectory": ".",
+  "cleanUrls": true,
   "rewrites": [
-    { "source": "/recipe-app", "destination": "/public/recipe-app/index.html" },
-    { "source": "/recipe-app/(.*)", "destination": "/public/recipe-app/$1" },
-    { "source": "/history-app", "destination": "/public/history-app/index.html" },  
-    { "source": "/history-app/(.*)", "destination": "/public/history-app/$1" },
+    { "source": "/recipe-app", "destination": "/recipe-app.html" },
+    { "source": "/history-app", "destination": "/history-app.html" },
     { "source": "/api/(.*)", "destination": "/api/$1" }
   ]
 }

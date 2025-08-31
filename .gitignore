@@ -18,3 +18,4 @@ __pycache__/
 *.log
 *.sql
 *.sqlite
+.env*.local
